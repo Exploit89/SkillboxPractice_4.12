@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,70 +8,62 @@ public class Calculator : MonoBehaviour
     [SerializeField] private Text _field2;
     [SerializeField] private Text _resultText;
 
-    private int _number1;
-    private int _number2;
     private int _result;
-
-    private bool ConvertToInt()
-    {
-        if (int.TryParse(_field1.text, out int result1) && int.TryParse(_field2.text, out int result2))
-        {
-            _number1 = result1;
-            _number2 = result2;
-            return true;
-        }
-        else
-        {
-            _resultText.text = "Incorrect input numbers";
-            _field1.text = string.Empty;
-            _field2.text = string.Empty;
-            return false;
-        }
-    }
-
-    private void SetResult()
-    {
-        _resultText.text = _result.ToString();
-    }
 
     public void Sum()
     {
-        if (ConvertToInt())
-        {
-            _result = _number1 + _number2;
-            SetResult();
-        }
+        Execute((n, m) => n + m);
     }
 
     public void Substract()
     {
-        if (ConvertToInt())
-        {
-            _result = _number1 - _number2;
-            SetResult();
-        }
+        Execute((n, m) => n - m);
     }
 
     public void Multiply()
     {
-        if (ConvertToInt())
-        {
-            _result = _number1 * _number2;
-            SetResult();
-        }
+        Execute((n, m) => n * m);
     }
 
     public void Divide()
     {
-        if (ConvertToInt())
+        if (ConvertToInt(out int number1, out int number2))
         {
-            if (_number2 == 0)
+            if (number2 == 0)
                 _resultText.text = "Error! Divide by zero";
             else
             {
-                _result = _number1 / _number2;
-                SetResult();
+                _result = number1 / number2;
+                PrintResult(_result);
             }
         }
+    }
+
+    private void Execute(Func<int, int, int> operation)
+    {
+        if (ConvertToInt(out int number1, out int number2))
+        {
+            int result = operation(number1, number2);
+            PrintResult(result);
+        }
+        else
+            PrintError();
+    }
+
+    private bool ConvertToInt(out int result1, out int result2)
+    {
+        return int.TryParse(_field1.text, out result1) & int.TryParse(_field2.text, out result2);
+    }
+
+    private void PrintResult(int result)
+    {
+        _resultText.text = result.ToString();
+    }
+
+    private void PrintError()
+    {
+        _resultText.text = "Incorrect input numbers";
+        _field1.text = string.Empty;
+        _field2.text = string.Empty;
     }
 }
